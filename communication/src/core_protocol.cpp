@@ -918,7 +918,7 @@ int CoreProtocol::build_describe_message(unsigned char *buf, unsigned char offse
         }
         appender.append('}');
     }
-    int msglen = appender.dataSize();
+    int msglen = offset + appender.dataSize();
 
 
     int buflen = (msglen & ~15) + 16;

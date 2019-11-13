@@ -331,10 +331,9 @@ int Protocol::begin()
 		if (error)
 			return error;
 	}
-	update_protocol_flags();
-
 	LOG(INFO,"Handshake completed");
 	channel.notify_established();
+	update_protocol_flags();
 	return error;
 }
 
@@ -537,8 +536,6 @@ ProtocolError Protocol::generate_and_send_description(MessageChannel& channel, M
     BufferAppender appender((message.buf() + header_size), (message.capacity() - header_size));
     build_describe_message(appender, desc_flags);
 
-    const size_t msglen = appender.dataSize();
-    message.set_length(msglen);
     if (appender.dataSize() > appender.bufferSize())
     {
         LOG(ERROR, "Describe message overflowed by %u bytes", (unsigned)(appender.dataSize() - appender.bufferSize()));
@@ -549,6 +546,8 @@ ProtocolError Protocol::generate_and_send_description(MessageChannel& channel, M
         // what's going on.
         SPARK_ASSERT(false);
     }
+
+    message.set_length(header_size + appender.dataSize());
 
     LOG(INFO, "Posting '%s%s%s' describe message", desc_flags & DESCRIBE_SYSTEM ? "S" : "",
         desc_flags & DESCRIBE_APPLICATION ? "A" : "", desc_flags & DESCRIBE_METRICS ? "M" : "");
